@@ -22,30 +22,32 @@ sheets.spreadsheets.values.get({
   console.log(response.values)
 })
 
-sheets.spreadsheets.values.update({
-  spreadsheetId,
-  range: 'sheet1!B2',
-  valueInputOption: 'USER_ENTERED',
-  includeValuesInResponse: true,
-  resource: {
-    values: [['500']]
-  }
+setTimeout(() => {
+  sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'sheet1!B2',
+    valueInputOption: 'USER_ENTERED',
+    includeValuesInResponse: true,
+    resource: {
+      values: [[Math.round(Math.random()*1000)]]
+    }
 
-}, (err, response) => {
-  if (err) {
-    console.log('err', err)
-  } else {
-    console.log(`\nField ins_amount should update in 8 seconds. Check the difference. \n`)
-    setTimeout(() => {
-      sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: 'sheet1!ins_datas'
-      }, (err, response) => {
-        console.log('==== updated values ====')
-        console.log(response.values)
-      })
-    }, 8000)
-  }
-})
+  }, (err, response) => {
+    if (err) {
+      console.log('err', err)
+    } else {
+      console.log(`\nField ins_amount, ins_fee_calculated should update in 8 seconds. Check the difference. \n`)
+      setTimeout(() => {
+        sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range: 'sheet1!ins_datas'
+        }, (err, response) => {
+          console.log('==== updated values ====')
+          console.log(response.values)
+        })
+      }, 8000)
+    }
+  })
+}, 2000)
 
 
