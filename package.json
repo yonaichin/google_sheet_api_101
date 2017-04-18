@@ -1,0 +1,10 @@
+{
+  "name": "google_sheet_api_101",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Olly.W",
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^19.0.0"
+  }
+}
