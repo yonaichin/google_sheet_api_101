@@ -4,6 +4,7 @@ import mongodb from 'mongodb'
 import mongoose from 'mongoose'
 import colors from 'colors'
 import R from 'ramda'
+import stringFormat from 'stringformat.js'
 
 import credentials from './credentials.json'
 import DB from './configs/db.json'
@@ -27,11 +28,11 @@ db.on('open', () => {
   console.log('db connected')
 })
 const age_start = 30
-const age_end = 30
+const age_end = 40
 const age_arr = _.range(age_start, age_end + 1, 1)
 const gender = ['male', 'female']
 const ins_amount_start = 5000
-const ins_amount_end = 10000
+const ins_amount_end = 2000000
 const ins_amount_offset = 1000
 const ins_pay_period = [null, 3, 6, 10]
 const timer_interval = 40
@@ -51,6 +52,7 @@ let timer = setInterval(() => {
     clearInterval(timer)
   } else {
     setData(query_matrix[matrix_idx++])
+    console.log(`Status: ${matrix_idx}/${query_matrix.length}, ETA: ${stringFormat.secondsToHHMMSS((query_matrix.length - matrix_idx) * timer_interval)}`)
   }
 }, timer_interval * 1000)
 const today = new Date()

@@ -1930,6 +1930,10 @@ string-width@^1.0.1, string-width@^1.0.2:
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
 
+stringformat.js:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/stringformat.js/-/stringformat.js-0.0.3.tgz#ba0b11d918f8bcda6d2245b672d1ccf19af72035"
+
 stringstream@~0.0.4:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/stringstream/-/stringstream-0.0.5.tgz#4e484cd4de5a0bbbee18e46307710a8a81621878"

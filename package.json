@@ -17,6 +17,7 @@
     "mongodb": "^2.2.27",
     "mongoose": "^4.10.2",
     "nodemon": "^1.11.0",
-    "ramda": "^0.23.0"
+    "ramda": "^0.23.0",
+    "stringformat.js": "^0.0.3"
   }
 }
