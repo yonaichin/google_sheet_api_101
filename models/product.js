@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 let ProductSchema = new mongoose.Schema({
   age: String,
   gender: String,
+  ins_id: String,
   ins_amount: String,
   ins_pay_period: String,
   ins_fee: String,

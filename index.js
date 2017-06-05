@@ -25,40 +25,16 @@ db.on('error', (err) => {
 })
 db.on('open', () => {
   console.log('db connected')
-  // let product = new Product()
-  // product.age = '26'
-  // product.gender = 'male'
-  // product.ins_amount = '5000000'
-  // product.ins_pay_period = '6'
-  // product.ins_fee = '6000'
-  // product.ins_fee_with_discount = '5555'
-  // product.forfeit_fee_matrix = 'table~~'
-  // product.save((err) => {
-  //   if (err) {
-  //     console.log('save error', err.message)
-  //   } else {
-  //   }
-  // })
-
-
-  // Product.find({age: '25'}, (err, p) => {
-  //   if (err) {
-  //     console.log('get error', err.message)
-  //   } else {
-  //     console.log('Product from db', JSON.stringify(p))
-  //   }
-
-  // })
 })
 const age_start = 30
-const age_end = 40
+const age_end = 30
 const age_arr = _.range(age_start, age_end + 1, 1)
 const gender = ['male', 'female']
 const ins_amount_start = 5000
 const ins_amount_end = 10000
 const ins_amount_offset = 1000
 const ins_pay_period = [null, 3, 6, 10]
-const timer_interval = 0.5
+const timer_interval = 40
 const ins_amount_arr = _.range(ins_amount_start, ins_amount_end + ins_amount_offset, ins_amount_offset)
 const query_matrix = R.pipe(
   R.xprod(age_arr),
@@ -69,7 +45,6 @@ const query_matrix = R.pipe(
 )(gender)
 
 
-// console.log('helloworld'.bgWhite.black, query_matrix)
 let matrix_idx = 0
 let timer = setInterval(() => {
   if (query_matrix[matrix_idx] === undefined) {
@@ -78,10 +53,82 @@ let timer = setInterval(() => {
     setData(query_matrix[matrix_idx++])
   }
 }, timer_interval * 1000)
+const today = new Date()
 function setData (dataset) {
   const { age, gender, ins_amount, ins_pay_period} = dataset
   console.log(`[age: ${age}, gender: ${gender}, ins_amount: ${ins_amount}, ins_pay_period: ${ins_pay_period === null ? '躉繳' : ins_pay_period + '年期'}] `.bgWhite.black)
+  updateGoogleDocValues('gender', gender === 'male' ? '男' : '女')
+  updateGoogleDocValues('ins_amount', ins_amount)
+  updateGoogleDocValues('ins_pay_period', ins_pay_period)
+  updateGoogleDocValues('birthday_year', today.getFullYear() - age - 1911 )
+  updateGoogleDocValues('birthday_month', today.getMonth() + 1)
+  updateGoogleDocValues('birthday_day', today.getDate())
+  // ins_id USL7
+  Promise.all([
+      getGoogleDocValues('ins_fee_USL7'),
+      getGoogleDocValues('ins_fee_with_discount_USL7'),
+      getGoogleDocValues('ins_product_USL7'),
+    ])
+    .then((results) => {
+      const ins_fee = results[0][0]
+      const ins_fee_with_discount = results[1][0]
+      const forfeit_fee_matrix = JSON.stringify(results[2])
+      console.log(`ins_fee: ${ins_fee}, ins_fee_with_discount: ${ins_fee_with_discount}`)
+      // save to db start
+      let product = new Product()
+      product.age = age
+      product.gender = gender
+      product.ins_amount = ins_amount
+      product.ins_pay_period = ins_pay_period
+      product.ins_fee = ins_fee
+      product.ins_fee_with_discount = ins_fee_with_discount
+      product.forfeit_fee_matrix = forfeit_fee_matrix
+      product.ins_id = 'USL7'
+      product.save((err) => {
+        if (err) {
+          console.log('save error', err.message)
+        } else {
+        }
+      })
+      // save to db ends
+    })
+    .catch((err) => {
+      console.log('err', err)
+    })
+  // ins_id BYA
+  Promise.all([
+      getGoogleDocValues('ins_fee_BYA'),
+      getGoogleDocValues('ins_fee_with_discount_BYA'),
+      getGoogleDocValues('ins_product_BYA'),
+    ])
+    .then((results) => {
+      const ins_fee = results[0][0]
+      const ins_fee_with_discount = results[1][0]
+      const forfeit_fee_matrix = JSON.stringify(results[2])
+      console.log(`ins_fee: ${ins_fee}, ins_fee_with_discount: ${ins_fee_with_discount}`)
+      // save to db start
+      let product = new Product()
+      product.age = age
+      product.gender = gender
+      product.ins_amount = ins_amount
+      product.ins_pay_period = ins_pay_period
+      product.ins_fee = ins_fee
+      product.ins_fee_with_discount = ins_fee_with_discount
+      product.forfeit_fee_matrix = forfeit_fee_matrix
+      product.ins_id = 'BYA'
+      product.save((err) => {
+        if (err) {
+          console.log('save error', err.message)
+        } else {
+        }
+      })
+      // save to db ends
+    })
+    .catch((err) => {
+      console.log('err', err)
+    })
 }
+
 const auth = new google.auth.JWT(
   credentials.client_email,
   null,
@@ -93,54 +140,43 @@ const auth = new google.auth.JWT(
 google.options({ auth })
 
 const sheets = google.sheets('v4')
-const spreadsheetId = '1yfwfh0StaFrvJuKyoJkMHojBFQcXAzcGXfys-LE-M70'
+const spreadsheetId = '1ekbjJmqqh7nDOdcZ7PDQTIuGusYniHZDh4P_O9TL9Yw'
 
-// sheets.spreadsheets.values.get({
-//   spreadsheetId,
-//   range: 'sheet_input!ins_product_BYA'
-// }, (err, response) => {
-//   console.log('==== initial values ====')
-//   // console.log(response.values)
-//   const ins_product = _.map(response.values, (val) => {
-//     const ins_fee = parseInt(_.get(val, '[0]', 0).replace(/,/g, ''))
-//     const rate = _.get(val, '[1]', null)
-//     return ({ ins_fee, rate })
-//   })
-//   console.log(ins_product)
-//
-// })
+function getGoogleDocValues (attr) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `sheet_input!${attr}`
+      }, (err, response) => {
+        if (err) {
+          reject(err)
+        }
+        if (attr.indexOf('ins_product') > -1) {
+          resolve(response.values)
+        } else {
+          const res = response.values.map(([v]) => v)
+          resolve(res)
+        }
 
-// setTimeout(() => {
-//   sheets.spreadsheets.values.update({
-//     spreadsheetId,
-//     range: 'sheet_input!ins_amount',
-//     valueInputOption: 'USER_ENTERED',
-//     includeValuesInResponse: true,
-//     resource: {
-//       values: [[ 10000 ]]
-//     }
-//
-//   }, (err, response) => {
-//     if (err) {
-//       console.log('err', err)
-//     } else {
-//       console.log(`\nField ins_amount, ins_fee_calculated should update in 8 seconds. Check the difference. \n`)
-//       setTimeout(() => {
-//         sheets.spreadsheets.values.get({
-//           spreadsheetId,
-//           range: 'sheet_input!ins_product_USL7'
-//         }, (err, response) => {
-//           console.log('==== updated values ====')
-//           const tmp = _.map(response.values, (val) => {
-//             const ins_fee = parseInt(_.get(val, '[0]', 0).replace(/,/g, ''))
-//             const rate = _.get(val, '[1]', null)
-//             return ({ ins_fee, rate })
-//           })
-//           console.log(tmp)
-//         })
-//       }, 30000)
-//     }
-//   })
-// }, 2000)
+      })
+    }, (timer_interval - 2) * 1000)
+  })
+}
+function updateGoogleDocValues (attr, value) {
+  sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `sheet_input!${attr}`,
+    valueInputOption: 'USER_ENTERED',
+    includeValuesInResponse: true,
+    resource: {
+      values: [[ value ]]
+    }
+  }, (err, response) => {
+    if (err) {
+      console.log(`update [${attr}] failed.`, err)
+    }
+  })
+}
 
 
