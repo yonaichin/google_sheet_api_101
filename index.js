@@ -1,3 +1,4 @@
+import fs from 'fs'
 import google from 'googleapis'
 import _ from 'lodash'
 import mongodb from 'mongodb'
@@ -47,14 +48,27 @@ const query_matrix = R.pipe(
 
 
 let matrix_idx = 0
-let timer = setInterval(() => {
-  if (query_matrix[matrix_idx] === undefined) {
-    clearInterval(timer)
+
+fs.readFile(`${__dirname}/matrix_idx.txt`, 'utf8', (err, idx) => {
+
+  if (err) {
+    console.log('read file error: ', err)
   } else {
-    setData(query_matrix[matrix_idx++])
-    console.log(`Status: ${matrix_idx}/${query_matrix.length}, ETA: ${stringFormat.secondsToHHMMSS((query_matrix.length - matrix_idx) * timer_interval)}`)
+    matrix_idx = idx
   }
-}, timer_interval * 1000)
+  let timer = setInterval(() => {
+    if (query_matrix[matrix_idx] === undefined) {
+      clearInterval(timer)
+    } else {
+      fs.writeFile(`${__dirname}/matrix_idx.txt`, matrix_idx, (err) => {
+        if (err) return console.log('write idx error', err)
+      })
+      setData(query_matrix[matrix_idx++])
+      console.log(`Status: ${matrix_idx}/${query_matrix.length}, ETA: ${stringFormat.secondsToHHMMSS((query_matrix.length - matrix_idx) * timer_interval)}`)
+    }
+  }, timer_interval * 1000)
+})
+
 const today = new Date()
 function setData (dataset) {
   const { age, gender, ins_amount, ins_pay_period} = dataset
