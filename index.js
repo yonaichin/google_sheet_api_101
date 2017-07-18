@@ -52,7 +52,7 @@ let matrix_idx = 0
 fs.readFile(`${__dirname}/matrix_idx.txt`, 'utf8', (err, idx) => {
 
   if (err) {
-    console.log('read file error: ', err)
+    console.log('Cannot found matrix_idx.txt. Start from index 0.')
   } else {
     matrix_idx = idx
   }
@@ -156,7 +156,7 @@ const auth = new google.auth.JWT(
 google.options({ auth })
 
 const sheets = google.sheets('v4')
-const spreadsheetId = '1ekbjJmqqh7nDOdcZ7PDQTIuGusYniHZDh4P_O9TL9Yw'
+const spreadsheetId = '14cI4jC3DM8D4oyHCUyxAkvVXw6afPYIxqGC5yfWPzco'
 
 function getGoogleDocValues (attr) {
   return new Promise((resolve, reject) => {
