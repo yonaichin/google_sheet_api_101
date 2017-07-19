@@ -122,13 +122,20 @@ function getGoogleDocValues (attr) {
           reject(err)
         }
         if (attr.indexOf('ins_product') > -1) {
-          resolve(response.values)
-        } else {
-          if (response.values === null) {
+          if (response === null || response === undefined || response.values === null || response.values === undefined) {
+            console.log(`getGoogleDocValues failed ['${attr}']`)
             reject(null)
+          } else {
+            resolve(response.values)
           }
-          const res = response.values.map(([v]) => v)
-          resolve(res)
+        } else {
+          if (response === null || response === undefined || response.values === null || response.values === undefined) {
+            console.log(`getGoogleDocValues failed ['${attr}']`)
+            reject(null)
+          } else {
+            const res = response.values.map(([v]) => v)
+            resolve(res)
+          }
         }
 
       })
@@ -183,7 +190,7 @@ const saveProductToDB = (id, dataset) => {
       // save to db ends
     })
     .catch((err) => {
-      console.log('err', err)
+      console.log(`saveProductToDB error ['${id}']`, err)
     })
 
 }
