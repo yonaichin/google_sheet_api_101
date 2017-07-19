@@ -61,7 +61,9 @@ fs.readFile(`${__dirname}/matrix_idx.txt`, 'utf8', (err, idx) => {
       clearInterval(timer)
     } else {
       fs.writeFile(`${__dirname}/matrix_idx.txt`, matrix_idx, (err) => {
-        if (err) return console.log('write idx error', err)
+        if (err) {
+        console.log('write idx error', err)
+        }
       })
       setData(query_matrix[matrix_idx++])
       console.log(`Status: ${matrix_idx}/${query_matrix.length}, ETA: ${stringFormat.secondsToHHMMSS((query_matrix.length - matrix_idx) * timer_interval)}`)
@@ -73,12 +75,14 @@ const today = new Date()
 function setData (dataset) {
   const { age, gender, ins_amount, ins_pay_period} = dataset
   console.log(`[age: ${age}, gender: ${gender}, ins_amount: ${ins_amount}, ins_pay_period: ${ins_pay_period === null ? '躉繳' : ins_pay_period + '年期'}] `.bgWhite.black)
+
   updateGoogleDocValues('gender', gender === 'male' ? '男' : '女')
   updateGoogleDocValues('ins_amount', ins_amount)
-  updateGoogleDocValues('ins_pay_period', ins_pay_period)
+  updateGoogleDocValues('ins_pay_period', ins_pay_period === null ? '躉繳' : ins_pay_period)
   updateGoogleDocValues('birthday_year', today.getFullYear() - age - 1911 )
   updateGoogleDocValues('birthday_month', today.getMonth() + 1)
   updateGoogleDocValues('birthday_day', today.getDate())
+
   // ins_id USL7
   Promise.all([
       getGoogleDocValues('ins_fee_USL7'),
@@ -171,6 +175,9 @@ function getGoogleDocValues (attr) {
         if (attr.indexOf('ins_product') > -1) {
           resolve(response.values)
         } else {
+          if (response.values === null) {
+            reject(null)
+          }
           const res = response.values.map(([v]) => v)
           resolve(res)
         }
