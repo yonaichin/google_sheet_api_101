@@ -73,7 +73,7 @@ fs.readFile(`${__dirname}/matrix_idx.txt`, 'utf8', (err, idx) => {
 
 const today = new Date()
 function setData (dataset) {
-  const { age, gender, ins_amount, ins_pay_period} = dataset
+  const { age, gender, ins_amount, ins_pay_period } = dataset
   console.log(`[age: ${age}, gender: ${gender}, ins_amount: ${ins_amount}, ins_pay_period: ${ins_pay_period === null ? '躉繳' : ins_pay_period + '年期'}] `.bgWhite.black)
 
   updateGoogleDocValues('gender', gender === 'male' ? '男' : '女')
@@ -83,70 +83,19 @@ function setData (dataset) {
   updateGoogleDocValues('birthday_month', today.getMonth() + 1)
   updateGoogleDocValues('birthday_day', today.getDate())
 
-  // ins_id USL7
-  Promise.all([
-      getGoogleDocValues('ins_fee_USL7'),
-      getGoogleDocValues('ins_fee_with_discount_USL7'),
-      getGoogleDocValues('ins_product_USL7'),
-    ])
-    .then((results) => {
-      const ins_fee = results[0][0]
-      const ins_fee_with_discount = results[1][0]
-      const forfeit_fee_matrix = JSON.stringify(results[2])
-      console.log(`ins_fee: ${ins_fee}, ins_fee_with_discount: ${ins_fee_with_discount}`)
-      // save to db start
-      let product = new Product()
-      product.age = age
-      product.gender = gender
-      product.ins_amount = ins_amount
-      product.ins_pay_period = ins_pay_period
-      product.ins_fee = ins_fee
-      product.ins_fee_with_discount = ins_fee_with_discount
-      product.forfeit_fee_matrix = forfeit_fee_matrix
-      product.ins_id = 'USL7'
-      product.save((err) => {
-        if (err) {
-          console.log('save error', err.message)
-        } else {
-        }
-      })
-      // save to db ends
-    })
-    .catch((err) => {
-      console.log('err', err)
-    })
-  // ins_id BYA
-  Promise.all([
-      getGoogleDocValues('ins_fee_BYA'),
-      getGoogleDocValues('ins_fee_with_discount_BYA'),
-      getGoogleDocValues('ins_product_BYA'),
-    ])
-    .then((results) => {
-      const ins_fee = results[0][0]
-      const ins_fee_with_discount = results[1][0]
-      const forfeit_fee_matrix = JSON.stringify(results[2])
-      console.log(`ins_fee: ${ins_fee}, ins_fee_with_discount: ${ins_fee_with_discount}`)
-      // save to db start
-      let product = new Product()
-      product.age = age
-      product.gender = gender
-      product.ins_amount = ins_amount
-      product.ins_pay_period = ins_pay_period
-      product.ins_fee = ins_fee
-      product.ins_fee_with_discount = ins_fee_with_discount
-      product.forfeit_fee_matrix = forfeit_fee_matrix
-      product.ins_id = 'BYA'
-      product.save((err) => {
-        if (err) {
-          console.log('save error', err.message)
-        } else {
-        }
-      })
-      // save to db ends
-    })
-    .catch((err) => {
-      console.log('err', err)
-    })
+  saveProductToDB('FID', dataset)
+  saveProductToDB('FSX', dataset)
+  saveProductToDB('FIA', dataset)
+  saveProductToDB('BYA', dataset)
+  saveProductToDB('DR0', dataset)
+  saveProductToDB('ZJ1', dataset)
+  saveProductToDB('FP', dataset)
+  saveProductToDB('ULA3', dataset)
+  saveProductToDB('USL9', dataset)
+  saveProductToDB('USL7', dataset)
+  saveProductToDB('ULA5', dataset)
+  saveProductToDB('FAS', dataset)
+  saveProductToDB('FBS', dataset)
 }
 
 const auth = new google.auth.JWT(
@@ -200,6 +149,43 @@ function updateGoogleDocValues (attr, value) {
       console.log(`update [${attr}] failed.`, err)
     }
   })
+}
+
+const saveProductToDB = (id, dataset) => {
+  const { age, gender, ins_amount, ins_pay_period } = dataset
+
+  Promise.all([
+      getGoogleDocValues(`ins_fee_${id}`),
+      getGoogleDocValues(`ins_fee_with_discount_${id}`),
+      getGoogleDocValues(`ins_product_${id}`),
+    ])
+    .then((results) => {
+      const ins_fee = results[0][0]
+      const ins_fee_with_discount = results[1][0]
+      const forfeit_fee_matrix = JSON.stringify(results[2])
+      console.log(`[${id}] ins_fee: ${ins_fee}, ins_fee_with_discount: ${ins_fee_with_discount}`)
+      // save to db start
+      let product = new Product()
+      product.age = age
+      product.gender = gender
+      product.ins_amount = ins_amount
+      product.ins_pay_period = ins_pay_period
+      product.ins_fee = ins_fee
+      product.ins_fee_with_discount = ins_fee_with_discount
+      product.forfeit_fee_matrix = forfeit_fee_matrix
+      product.ins_id = id
+      product.save((err) => {
+        if (err) {
+          console.log('save error', err.message)
+        } else {
+        }
+      })
+      // save to db ends
+    })
+    .catch((err) => {
+      console.log('err', err)
+    })
+
 }
 
 
